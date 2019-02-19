@@ -47,16 +47,6 @@
   register: centos_yum_update_pkgs
   tags: [centos, yum]
 
-- debug:
-    msg: "List of updated packages:"
-  when: "centos_yum_update_pkgs.stdout != ''"
-  tags: [centos, yum]
-
-- debug:
-    msg: "{{ centos_yum_update_pkgs.stdout_lines }}"
-  when: "centos_yum_update_pkgs.stdout != ''"
-  tags: [centos, yum]
-
 - name: Remove unused packages exclude libselinux-python
   shell: yum --exclude="libselinux-python*" autoremove -y | grep "Erasing" | awk '{print $3}' warn=no
   register: centos_yum_autoremove
