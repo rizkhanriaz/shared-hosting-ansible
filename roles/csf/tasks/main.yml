@@ -1,0 +1,19 @@
+
+- import_tasks: disable_firewall.yml
+  when: "csf_disable_firewall == true"
+
+- import_tasks: install.yml
+  when: "csf_manage_installation == true"
+
+- import_tasks: configure.yml
+  when: "csf_manage_configuration == true"
+
+- name: ensure csf/lfd started/enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - csf
+    - lfd
+  tags: [csf, healthcheck]

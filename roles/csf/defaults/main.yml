@@ -1,0 +1,78 @@
+---
+
+csf_manage_installation: yes
+
+csf_manage_configuration: yes
+
+csf_disable_firewall: yes
+
+csf_tmp_dir: "/usr/src"
+
+csf_required_packages:
+  - iptables
+  - perl
+  - unzip
+  - tar
+  - net-tools
+  - bind-utils
+  - perl-libwww-perl
+  - perl-LWP-Protocol-https
+
+csf_global_ini_core:
+  - option: TESTING
+    value: "0"
+  - option: AUTO_UPDATES
+    value: "1"
+  - option: PORTS_sshd
+    value: 22
+
+csf_global_ini:
+  - option: RESTRICT_UI
+    value: "2"
+  - option: RESTRICT_SYSLOG
+    value: "3"
+  - option: URLGET
+    value: "2"
+  - option: USE_CONNTRACK
+    value: "1"
+  - option: TCP_IN
+    value: "80,443,22,32314"
+  - option: TCP_OUT
+    value: "80,443,22,32314,2525"
+  - option: UDP_IN
+    value: ""
+  - option: UDP_OUT
+    value: "53,123"
+
+csf_allow:
+  - 103.21.244.0/22
+  - 103.22.200.0/22
+
+csf_ignore:
+ - 10.10.10.10
+ - 172.16.1.1/29
+
+csf_pignore:
+  - 'exe:/usr/sbin/postfix'
+  - 'user:postfix'
+  - 'exe:/usr/local/apache2/bin/httpd'
+  - 'exe:/opt/digitalocean/bin/do-agent'
+  - 'exe:/usr/sbin/rpcbind'
+
+csf_fignore:
+ - '/tmp/\.horde'
+ - '/tmp/\.horde/.*'
+
+csf_blocklists:
+ - "SPAMDROP"
+
+csf_dyndns:
+ - "no-ip.com"
+
+csf_csfpre_sh: |
+ #!/bin/bash
+ /sbin/iptables -t nat -F POSTROUTING
+
+csf_csfpost_sh: |
+ #!/bin/bash
+ /sbin/iptables -t nat -F POSTROUTING

@@ -1,0 +1,104 @@
+---
+
+## PHP
+
+- name: Make sure that libselinux-python is installed
+  yum:
+    name: libselinux-python
+    state: latest
+  tags: [php]
+
+- name: Check if PHP is installed
+  command: php -v warn=no
+  register: php_is_installed_test
+  ignore_errors: yes
+  changed_when: false
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ php_install_path }}/bin"
+  tags: [php]
+
+- set_fact:
+    php_is_installed: true
+  when: php_is_installed_test.rc != 2
+  tags: [php]
+
+- set_fact:
+    php_is_installed: false
+    php_install_new_version: true
+  when: php_is_installed_test.rc == 2
+  tags: [php]
+
+- set_fact:
+    php_install_new_version: true
+  when: ( php_is_installed == true ) and ( php_is_installed_test.stdout_lines[0].split('cli')[0] | regex_replace('[^0-9.]','') != php_version )
+  tags: [php]
+
+- set_fact:
+    php_install_new_version: false
+  when: ( php_is_installed == true ) and ( php_is_installed_test.stdout_lines[0].split('cli')[0] | regex_replace('[^0-9.]','') == php_version )
+  tags: [php]
+
+
+## BISON
+
+- name: Check if bison is installed
+  command: bison -V warn=no 
+  register: php_bison_is_installed_test
+  ignore_errors: yes
+  changed_when: false
+  environment:
+    PATH: "PATH:$PATH:{{ php_bison_install_path }}/bin"
+  tags: [php, bison]
+
+- set_fact:
+    php_bison_is_installed: true
+  when: php_bison_is_installed_test.rc != 2
+  tags: [php, bison]
+
+- set_fact:
+    php_bison_is_installed: false
+    php_bison_install_new_version: true
+  when: php_bison_is_installed_test.rc == 2
+  tags: [php, bison]
+
+- set_fact:
+    php_bison_install_new_version: true
+  when: ( php_bison_is_installed == true ) and ( php_bison_is_installed_test.stdout_lines[0] | regex_replace('[^0-9.]','') != php_bison_version )
+  tags: [php, bison]
+
+- set_fact:
+    php_bison_install_new_version: false
+  when: ( php_bison_is_installed == true ) and ( php_bison_is_installed_test.stdout_lines[0] | regex_replace('[^0-9.]','') == php_bison_version )
+  tags: [php, bison]
+
+
+- import_tasks: bison.yml
+  when: "php_bison_installtion == true and php_bison_install_new_version == true"
+
+- import_tasks: install.yml
+  when: "( php_install_new_version == true and php_manage_installation == true) or php_force_install == true"
+
+- import_tasks: configure.yml
+  when: "php_manage_configuration == true"
+
+- import_tasks: fpm.yml
+  when: "php_manage_fpm == true"
+
+- import_tasks: fpm-pool.yml
+  when: "php_setup_fpm_pool == true"
+
+- import_tasks: composer.yml
+  when: "php_manage_composer == true"
+
+- import_tasks: opcache.yml
+  when: "php_manage_opcache == true"
+
+- import_tasks: restart.yml
+  when: "php_force_restart == true"
+
+- name: Start and enable PHP-FPM service
+  service:
+    name: "{{ php_codename }}-fpm"
+    state: started
+    enabled: yes
+  tags: [php, healthcheck]

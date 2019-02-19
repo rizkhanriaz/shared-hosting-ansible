@@ -1,0 +1,72 @@
+
+- hosts: web-servers
+  become: yes
+  become_user: root
+  tasks:
+  - name: Update PHP 5.6.40 configuration 
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "5.6.40"
+      php_codename: php56
+      php_bison_installtion: no
+      php_manage_installation: no
+      php_set_executable_path: no
+      php_manage_fpm: no
+      php_setup_fpm_pool: no
+      php_manage_composer: no
+      php_manage_configuration: yes
+      php_manage_opcache: yes
+      php_force_restart: yes
+
+  - name: Update PHP 7.0.33 configuration 
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.0.33"
+      php_codename: php70
+      php_bison_installtion: no
+      php_manage_installation: no
+      php_set_executable_path: no
+      php_manage_fpm: no
+      php_setup_fpm_pool: no
+      php_manage_composer: no
+      php_manage_configuration: yes
+      php_manage_opcache: yes
+      php_force_restart: yes
+
+  - name: Update PHP 7.1.25 configuration 
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.1.25"
+      php_codename: php71
+      php_bison_installtion: no
+      php_manage_installation: no
+      php_set_executable_path: no
+      php_manage_fpm: no
+      php_setup_fpm_pool: no
+      php_manage_composer: no
+      php_manage_configuration: yes
+      php_manage_opcache: yes
+      php_force_restart: yes
+
+  - name: Update PHP 7.2.13 configuration 
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.2.13"
+      php_codename: php72
+      php_bison_installtion: no
+      php_manage_installation: no
+      php_set_executable_path: no
+      php_manage_fpm: no
+      php_setup_fpm_pool: no
+      php_manage_composer: no
+      php_manage_configuration: yes
+      php_manage_opcache: yes
+      php_force_restart: yes
+
+  vars_files:
+    - ../vars/php-vars.yml
+

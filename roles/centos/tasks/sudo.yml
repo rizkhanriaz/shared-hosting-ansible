@@ -1,0 +1,19 @@
+---
+
+- name: Enable sudo usage that requires password
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) ALL"
+  when: "centos_groups_wheel_password_required == true"
+  tags: [centos, sudo]
+
+- name: Enable sudo usage that does not require password
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+  when: "centos_groups_wheel_password_required == false"
+  tags: [centos, sudo]

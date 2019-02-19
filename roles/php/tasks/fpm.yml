@@ -1,0 +1,22 @@
+---
+
+- name: Create php-fpm.conf file if not present
+  copy:
+    src: "{{ php_install_path }}/etc/php-fpm.conf.default"
+    dest: "{{ php_fpm_conf_file_path }}"
+    remote_src: yes
+    force: no
+    owner: root
+    group: root
+    mode: 0644
+  tags: [php, fpm]
+
+- name: Configure PHP-FPM pid
+  lineinfile:
+    dest: "{{ php_fpm_conf_file_path }}"
+    line: "pid = {{ php_pid_location }}"
+    state: present
+    regexp: '^;?pid'
+  notify: restart php-fpm
+  tags: [php, fpm]
+

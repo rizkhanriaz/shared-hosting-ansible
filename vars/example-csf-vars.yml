@@ -1,0 +1,109 @@
+---
+
+csf_manage_installation: yes
+
+csf_manage_configuration: yes
+
+csf_disable_firewall: yes
+
+csf_tmp_dir: "/usr/src"
+
+csf_required_packages:
+  - iptables
+  - perl
+  - unzip
+  - tar
+  - net-tools
+  - bind-utils
+  - perl-libwww-perl
+  - perl-LWP-Protocol-https
+
+csf_global_ini_core:
+  - option: TESTING
+    value: "0"
+  - option: AUTO_UPDATES
+    value: "1"
+  - option: PORTS_sshd
+    value: 22
+
+csf_global_ini:
+  - option: RESTRICT_UI
+    value: "2"
+  - option: RESTRICT_SYSLOG
+    value: "3"
+  - option: URLGET
+    value: "2"
+  - option: USE_CONNTRACK
+    value: "1"
+  - option: TCP_IN
+    value: "80,443,22,32314"
+  - option: TCP_OUT
+    value: "80,443,22,32314,2525"
+  - option: UDP_IN
+    value: ""
+  - option: UDP_OUT
+    value: "53,123"
+
+csf_allow:
+  - 103.21.244.0/22 # Cloudflare IPv4 Start
+  - 103.22.200.0/22
+  - 103.31.4.0/22
+  - 104.16.0.0/12
+  - 108.162.192.0/18
+  - 131.0.72.0/22
+  - 141.101.64.0/18
+  - 162.158.0.0/15
+  - 172.64.0.0/13
+  - 173.245.48.0/20
+  - 188.114.96.0/20
+  - 190.93.240.0/20
+  - 197.234.240.0/22
+  - 198.41.128.0/17 # Cloudflare IPv4 End
+  - 2400:cb00::/32 # Cloudflare IPv6 Start
+  - 2405:8100::/32
+  - 2405:b500::/32
+  - 2606:4700::/32
+  - 2803:f800::/32
+  - 2c0f:f248::/32
+  - 2a06:98c0::/29 # Cloudflare IPv6 End
+  - 34.199.54.113/32 # Bitbucket Pipelines Start
+  - 34.232.25.90/32
+  - 34.232.119.183/32
+  - 34.236.25.177/32
+  - 35.171.175.212/32
+  - 52.54.90.98/32
+  - 52.202.195.162/32
+  - 52.203.14.55/32
+  - 52.204.96.37/32
+  - 52.8.84.222/32
+  - 52.52.234.127/32
+  - 104.192.136.0/21 # Bitbucket Pipelines End
+
+csf_ignore:
+ - 10.10.10.10
+ - 172.16.1.1/29
+
+csf_pignore:
+  - 'exe:/usr/sbin/postfix'
+  - 'user:postfix'
+  - 'exe:/usr/local/apache2/bin/httpd'
+  - 'exe:/opt/digitalocean/bin/do-agent'
+  - 'exe:/usr/sbin/rpcbind'
+
+csf_fignore:
+ - '/tmp/\.horde'
+ - '/tmp/\.horde/.*'
+
+csf_blocklists:
+ - "SPAMDROP"
+
+csf_dyndns:
+ - "no-ip.com"
+
+csf_csfpre_sh: |
+ #!/bin/bash
+ /sbin/iptables -t nat -F POSTROUTING
+
+csf_csfpost_sh: |
+ #!/bin/bash
+ /sbin/iptables -t nat -F POSTROUTING

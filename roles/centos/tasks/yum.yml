@@ -1,0 +1,104 @@
+---
+
+- name: Dump installed packages
+  shell: "yum list installed > {{ centos_yum_initial_package_list_path }} warn=no"
+  args:
+    creates: "{{ centos_yum_initial_package_list_path }}"
+  tags: [centos, yum]
+
+- name: Make sure that GPG check is enabled
+  lineinfile:
+    dest: /etc/yum.conf
+    line: "gpgcheck=1"
+    state: present
+  tags: [centos, yum]
+
+- name: Get all repositories for GPG check
+  shell: find /etc/yum.repos.d -type f -name "*.repo" warn=no
+  register: centos_yum_repositories
+  changed_when: false
+  tags: [centos, yum]
+
+- name: Make sure that GPG check is enabled in all repositories
+  lineinfile:
+    dest: "{{ item }}"
+    line: gpgcheck=0
+    state: absent
+  with_items: "{{ centos_yum_repositories.stdout_lines }}"
+  tags: [centos, yum]
+
+- name: Install delta RPM
+  yum:
+    name: deltarpm
+    state: latest
+  tags: [centos, yum]
+
+- name: Remove packages
+  yum:
+    name: "{{ item }}"
+    state: removed
+  with_items: "{{ centos_yum_unnecessary_packages }}"
+  tags: [centos, yum]
+
+- name: Update yum
+  yum:
+    name: '*'
+    state: latest
+  register: centos_yum_update_pkgs
+  tags: [centos, yum]
+
+- debug:
+    msg: "List of updated packages:"
+  when: "centos_yum_update_pkgs.stdout != ''"
+  tags: [centos, yum]
+
+- debug:
+    msg: "{{ centos_yum_update_pkgs.stdout_lines }}"
+  when: "centos_yum_update_pkgs.stdout != ''"
+  tags: [centos, yum]
+
+- name: Remove unused packages exclude libselinux-python
+  shell: yum --exclude="libselinux-python*" autoremove -y | grep "Erasing" | awk '{print $3}' warn=no
+  register: centos_yum_autoremove
+  changed_when: "centos_yum_autoremove.stdout != ''"
+  environment:
+    LANG: C
+  tags: [centos, yum]
+
+- debug:
+    msg: "List of autoremoved packages:"
+  when: "centos_yum_autoremove.stdout != ''"
+  tags: [centos, yum]
+
+- debug:
+    msg: "{{ centos_yum_autoremove.stdout_lines }}"
+  when: "centos_yum_autoremove.stdout != ''"
+  tags: [centos, yum]
+
+- name: Install additional packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ centos_yum_additional_tools }}"
+  tags: [centos, yum]
+
+- name: Install cron for Yum
+  yum:
+    name: yum-cron
+    state: latest
+  tags: [centos, yum]
+
+- name: Disable automatic installation for yum-cron
+  lineinfile:
+    dest: /etc/yum/yum-cron.conf
+    line: "apply_updates = no"
+    state: present
+  notify: restart yum-cron
+  tags: [centos, yum]
+
+- name: Start yum cron service and enable it on start
+  service:
+    name: yum-cron
+    state: started
+    enabled: yes
+  tags: [centos, yum, healthcheck]

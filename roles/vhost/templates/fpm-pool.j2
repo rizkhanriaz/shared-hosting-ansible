@@ -1,0 +1,39 @@
+
+{% set fpm_pool = item.value.php %}
+{% set vhost = item.value %}
+
+[{{ fpm_pool.pool_name }}]
+catch_workers_output = yes
+chdir = /home/{{ vhost.username }}
+group = {{ vhost.username }}
+listen = 127.0.0.1:{{ fpm_pool.pool_port }}
+listen.group = {{ httpd_group }}
+listen.mode = 0660
+listen.owner = {{ vhost.username }}
+php_flag[display_errors] = off
+php_admin_flag[allow_url_fopen] = on
+{% if fpm_pool.php_admin_flags is defined %}
+{% for config in fpm_pool.php_admin_flags %}
+php_flag[{{ config.key }}] = {{ config.value }}
+{% endfor %}
+{% endif %}
+{% if fpm_pool.php_admin_values is defined %}
+{% for config in fpm_pool.php_admin_values %}
+php_admin_value[{{ config.key }}] = {{ config.value }}
+{% endfor %}
+{% endif %}
+php_admin_value[doc_root] = "/home/{{ vhost.username }}/public_html"
+php_admin_value[error_log] = /home/{{ vhost.username }}/error.log
+php_admin_value[short_open_tag] = on
+php_value[error_reporting] = E_ALL & ~E_NOTICE
+ping.path = /ping
+pm = {{ fpm_pool.process_manager.pm }}
+pm.max_children = {{ fpm_pool.process_manager.max_children }}
+pm.start_servers = {{ fpm_pool.process_manager.start_servers }}
+pm.min_spare_servers = {{ fpm_pool.process_manager.min_spare_servers }}
+pm.max_spare_servers = {{ fpm_pool.process_manager.max_spare_servers }}
+pm.process_idle_timeout = 10
+pm.status_path = /status
+security.limit_extensions = .phtml .php .php3 .php4 .php5 .php6 .php7
+user = {{ vhost.username }}
+

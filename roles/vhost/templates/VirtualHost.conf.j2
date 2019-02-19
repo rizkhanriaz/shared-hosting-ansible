@@ -1,0 +1,73 @@
+{% if item.value.https is defined and item.https == true %}
+<IfModule mod_ssl.c>
+{% endif %}
+<VirtualHost *:{{ '443' if item.value.https is defined and item.value.https == true else httpd_port }}>
+
+{% if item.value.username is defined %}
+  {% set documentroot = "/home/" + item.value.username + "/public_html/" %}
+  {% set logroot = "/home/" + item.value.username %}
+{% endif %}
+
+    ServerName {{ item.value.servername }}
+{% if item.value.serveralias is defined %}
+    ServerAlias {{ item.value.serveralias }}
+{% endif %}
+
+
+
+    # Directory settings
+    DocumentRoot {{ documentroot }}
+    <Directory {{ documentroot }}>
+        AllowOverride All
+        Require all granted
+        Options +FollowSymLinks -Indexes -Includes
+    </Directory>
+
+
+
+{% if item.value.php is defined %}
+    # PHP-FPM settings
+    <Proxy "fcgi://127.0.0.1:{{ item.value.php.pool_port }}" timeout={{ item.value.php.timeout | default(30) }}>
+    </Proxy>
+
+{% if item.value.php.status is defined and item.value.php.status == true %}
+    <LocationMatch "/(status|ping)">
+        RewriteEngine Off
+        Require all denied
+        Require ip 127.0.0.1 {{ httpd_server_ips | join(' ') | default('') }}
+        SetHandler "proxy:fcgi://127.0.0.1:{{ item.value.php.pool_port }}"
+    </LocationMatch>
+{% endif %}
+
+    <FilesMatch "\.php$">
+        <If "-f %{SCRIPT_FILENAME}">
+            SetHandler "proxy:fcgi://127.0.0.1:{{ item.value.php.pool_port }}"
+        </If>
+    </FilesMatch>
+{% endif %}
+
+
+    # Logging
+    #ErrorLog "{{ logroot }}/httpd-error.log"
+    #CustomLog "{{ logroot }}/httpd-access.log" common
+
+
+{% if item.value.https is defined and item.value.https == true %}
+    # SSL configuration
+    SSLEngine on
+    SSLCertificateFile "{{ item.value.cert_file_path }}"
+    SSLCertificateKeyFile "{{ item.value.cert_key_file_path }}"
+{% if item.value.cert_chain_file is defined %}
+    SSLCertificateChainFile "{{ item.value.cert_chain_file }}"
+{% endif %}
+{% if item.value.http2 is defined and item.value.http2 == true %}
+    <IfModule mod_http2.c>
+        Protocols h2 h2c http/1.1
+    </IfModule>
+{% endif %}
+{% endif %}
+
+</VirtualHost>
+{% if item.value.https is defined and item.value.https == true %}
+</IfModule>
+{% endif %}

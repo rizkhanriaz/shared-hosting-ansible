@@ -1,0 +1,85 @@
+
+- hosts: web-servers
+  become: yes
+  become_user: root
+  roles:
+    - ../roles/centos
+    - ../roles/ntp
+    - ../roles/openssl
+    - ../roles/httpd
+    - ../roles/git
+    - ../roles/csf
+  tasks:
+  - name: Install and configure php-5.6.40
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "5.6.40"
+      php_codename: php56
+      php_fpm_pool_name: exampleone_com
+      php_fpm_pool_port: 9002
+      php_bison_installtion: yes
+      php_set_executable_path: yes
+      php_configure_options:
+       - "--prefix={{ php_install_path }}"
+       - --enable-fpm
+       - --disable-short-tags
+       - --with-openssl
+       - --with-pcre-regex
+       - --with-zlib
+       - --enable-bcmath
+       - --with-bz2
+       - --enable-calendar
+       - --with-curl
+       - --enable-exif
+       - --with-gd
+       - --enable-intl
+       - --enable-mbstring
+       - --with-mysql
+       - --with-mysqli
+       - --enable-pcntl
+       - --with-pdo-mysql
+       - --enable-soap
+       - --enable-sockets
+       - --with-xmlrpc
+       - --enable-zip
+       - --with-jpeg-dir
+       - --with-png-dir
+       - --without-pear
+
+  - name: Install and configure php-7.0.33
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.0.33"
+      php_codename: php70
+      php_fpm_pool_name: exampletwo_com
+      php_fpm_pool_port: 9003
+
+  - name: Install and configure php-7.1.25
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.1.25"
+      php_codename: php71
+      php_manage_composer: yes
+      php_fpm_pool_name: examplethree_com
+      php_fpm_pool_port: 9004
+
+  - name: Install and configure php-7.2.13
+    include_role:
+      name: ../roles/php
+    vars:
+      php_version: "7.2.13"
+      php_codename: php72
+      php_fpm_pool_name: examplefour_com
+      php_fpm_pool_port: 9005
+
+  vars_files:
+    - ../vars/centos-vars.yml
+    - ../vars/ntp-vars.yml
+    - ../vars/openssl-vars.yml
+    - ../vars/httpd-vars.yml
+    - ../vars/git-vars.yml
+    - ../vars/csf-vars.yml
+    - ../vars/php-vars.yml

@@ -1,0 +1,42 @@
+---
+
+- name: install required packages
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - "{{ csf_required_packages }}"
+  tags: [csf, install]
+
+- name: check /usr/sbin/csf file
+  stat:
+    path: /usr/sbin/csf
+  register: csf_sbin_file
+  tags: [csf, install]
+
+- name: download csf.tgz
+  get_url:
+    url: https://download.configserver.com/csf.tgz
+    dest: "{{ csf_tmp_dir }}/csf.tgz"
+  when: not csf_sbin_file.stat.exists
+  tags: [csf, install]
+
+- name: unpack csf.tgz
+  unarchive:
+    src: "{{ csf_tmp_dir }}/csf.tgz"
+    dest: "{{ csf_tmp_dir }}"
+    remote_src: yes
+    creates: "{{ csf_tmp_dir }}/csf/install.sh"
+  when: not csf_sbin_file.stat.exists
+  tags: [csf, install]
+
+- name: run CSF installer
+  command: sh install.sh
+  args:
+    chdir: "{{ csf_tmp_dir }}/csf"
+    creates: /etc/csf/csf.conf
+  when: not csf_sbin_file.stat.exists
+  notify:
+    - run csftest.pl
+  tags: [csf, install]

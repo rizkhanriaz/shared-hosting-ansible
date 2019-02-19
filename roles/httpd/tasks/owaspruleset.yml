@@ -1,0 +1,41 @@
+---
+
+# Download OWASP Ruleset
+# https://github.com/SpiderLabs/owasp-modsecurity-crs/releases
+#
+- name: Download OWASP source files
+  get_url:
+    dest: "{{ httpd_sources_location }}"
+    url: "https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/{{ httpd_owasp_version }}.tar.gz"
+  tags: [httpd, install, modsec, owasp]
+
+- name: Create apache conf crs directory
+  file:
+    path: "{{ httpd_install_path }}/conf/crs"
+    state: directory
+    owner: root
+    group: root
+    mode: 0600
+  tags: [httpd, install, modsec, owasp]
+
+- name: Unpack downloaded crs sources
+  unarchive:
+    src: "{{ httpd_sources_location }}/owasp-modsecurity-crs-{{ httpd_owasp_version_txt_only }}.tar.gz"
+    dest: "{{ httpd_install_path }}/conf/crs"
+    extra_opts: [--strip-components=1]
+    owner: "root"
+    group: "root"
+    mode: 0755
+    remote_src: yes
+  tags: [httpd, install, modsec, owasp]
+
+- name: Copy crs-setup.conf.example to crs-setup.conf
+  copy:
+    src: "{{ httpd_install_path }}/conf/crs/crs-setup.conf.example"
+    dest: "{{ httpd_install_path }}/conf/crs/crs-setup.conf"
+    remote_src: yes
+    force: no
+    owner: root
+    group: root
+    mode: 0644
+  tags: [httpd, install, modsec, owasp]

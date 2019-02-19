@@ -1,0 +1,13 @@
+apache_vhosts_sites: []
+apache_vhosts_remove_sites: []
+centos_users_to_remove: []
+apache_vhosts_template: "VirtualHost.conf.j2"
+
+httpd_install_path: /usr/local/apache2
+httpd_port: 80
+httpd_user: httpd
+httpd_group: www
+
+php_install_path: "/usr/local"
+
+apache_conf_path: "{{ httpd_install_path }}/conf"

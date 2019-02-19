@@ -1,0 +1,18 @@
+
+- hosts: web-servers
+  become: yes
+  become_user: root
+  tasks:
+  - name: Update and restart httpd configuration
+    include_role:
+      name: ../roles/httpd
+    vars:
+      httpd_manage_installation: no
+      httpd_install_mod_cloudflare: no
+      httpd_manage_configuration: yes
+      httpd_install_modsec: no
+      httpd_configure_owasp: no
+      httpd_configure_modsec: yes
+  vars_files:
+    - ../vars/httpd-vars.yml
+

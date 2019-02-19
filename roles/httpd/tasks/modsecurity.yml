@@ -1,0 +1,73 @@
+---
+
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: latest
+  tags: [httpd, install, modsec]
+
+- name: Install required tools for compiling modsecurity
+  yum:
+    name: ['automake', 'libtool', 'libxml2-devel']
+    state: latest
+  tags: [httpd, install, modsec]
+
+
+# Download modsecurity source code
+# https://www.modsecurity.org/download.html
+#
+- name: Download modsecurity source files
+  get_url:
+    dest: "{{ httpd_sources_location }}"
+    url: "https://www.modsecurity.org/tarball/{{ httpd_modsec_version }}/modsecurity-{{ httpd_modsec_version }}.tar.gz"
+  tags: [httpd, install, modsec]
+
+- name: Unpack downloaded modsecurity sources
+  unarchive:
+    src: "{{ httpd_sources_location }}/modsecurity-{{ httpd_modsec_version }}.tar.gz"
+    dest: "{{ httpd_sources_location }}"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    copy: no
+    creates: "{{ httpd_sources_location }}/modsecurity-{{ httpd_modsec_version }}"
+  tags: [httpd, install, modsec]
+
+- name: Compile modsecurity
+  command: "{{ item }}"
+  args:
+    chdir: "{{ httpd_sources_location }}/modsecurity-{{ httpd_modsec_version }}"
+  with_items:
+    - ./autogen.sh
+    - "./configure {{ httpd_modsec_configure_options | join(' ') }}"
+    - make
+  become: true
+  become_user: "{{ build_user }}"
+  tags: [httpd, install, modsec]
+
+- name: Install compiled modsecurity
+  command: make install
+  args:
+    chdir: "{{ httpd_sources_location }}/modsecurity-{{ httpd_modsec_version }}"
+  tags: [httpd, install, modsec]
+
+- name: Copy modsecurity module to apache
+  copy:
+    src: "{{ httpd_modsec_install_path }}/lib/mod_security2.so"
+    dest: "{{ httpd_install_path }}/modules"
+    remote_src: yes
+    force: no
+    owner: root
+    group: root
+    mode: 0755
+  tags: [httpd, install, modsec]
+
+- name: Copy unicode.mapping from modsecurity source to httpd conf
+  copy:
+    src: "{{ httpd_sources_location }}/modsecurity-{{ httpd_modsec_version }}/unicode.mapping"
+    dest: "{{ httpd_install_path }}/conf/"
+    remote_src: yes
+    force: no
+    owner: root
+    group: root
+    mode: 0755
+  tags: [httpd, install, modsec]

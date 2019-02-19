@@ -1,0 +1,179 @@
+---
+
+- name: Configure public key authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "PubkeyAuthentication {{ centos_ssh_authentication_public_key }}"
+    state: present
+    regexp: '^#?PubkeyAuthentication'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure password authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "PasswordAuthentication {{ centos_ssh_authentication_password }}"
+    state: present
+    regexp: '^#?PasswordAuthentication'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure PAM authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "ChallengeResponseAuthentication {{ centos_ssh_challenge_response }}"
+    state: present
+    regexp: '^#?ChallengeResponseAuthentication'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure GSS API authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "GSSAPIAuthentication {{ centos_ssh_authentication_gss_api }}"
+    state: present
+    regexp: '^#?GSSAPIAuthentication'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure Kerberos authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "KerberosAuthentication {{ centos_ssh_authentication_kerberos }}"
+    state: present
+    regexp: '^#?KerberosAuthentication'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure logging in as root
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "PermitRootLogin {{ centos_ssh_login_as_root }}"
+    state: present
+    regexp: '^#?PermitRootLogin'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure access for users with empty password
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "PermitEmptyPasswords {{ centos_ssh_login_with_empty_password }}"
+    state: present
+    regexp: '^#?PermitEmptyPasswords'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure strict mode
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "StrictModes {{ centos_ssh_strict_mode }}"
+    state: present
+    regexp: '^#?StrictModes'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure list of users that have access to server
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "AllowUsers {{ centos_ssh_allowed_users | join (' ') }}"
+    state: present
+    regexp: '^#?AllowUsers'
+  notify: restart sshd
+  when: "centos_ssh_allowed_users | length > 0"
+  tags: [centos, ssh]
+
+- name: Make sure that all users can access the server
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    state: absent
+    regexp: '^AllowUsers'
+  notify: restart sshd
+  when: "centos_ssh_allowed_users | length == 0"
+  tags: [centos, ssh]
+
+- name: Set .rhosts and .shosts files checks
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "IgnoreRhosts {{ centos_ssh_ignore_rhosts }}"
+    state: present
+    regexp: '^#?IgnoreRhosts'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure X11 Forwarding
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "X11Forwarding {{ centos_ssh_x11_forwarding }}"
+    state: present
+    regexp: '^#?X11Forwarding'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Make sure that protocol 2 is enabled
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "Protocol 2"
+    state: present
+    regexp: '^#?Protocol'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Make sure that printing last log is enabled
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "PrintLastLog yes"
+    state: present
+    regexp: '^#?PrintLastLog'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure key exchange
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "KexAlgorithms {{ centos_ssh_key_exchange_algorithms | join (',') }}"
+    state: present
+    regexp: '^#?KexAlgorithms'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Enable secure keys for server authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "HostKey /etc/ssh/{{ item }}"
+    state: present
+  with_items: "{{ centos_ssh_server_key_authentications }}"
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Remove all other keys for server authentication
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    regexp: "HostKey /etc/ssh/(?!{{ centos_ssh_server_key_authentications | join('|') }})"
+    state: absent
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure SSH ciphers
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "Ciphers {{ centos_ssh_ciphers | join (',') }}"
+    state: present
+    regexp: '^#?Ciphers'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Configure SSH MACs
+  lineinfile:
+    dest: "{{ centos_ssh_config_file }}"
+    line: "MACs {{ centos_ssh_macs | join (',') }}"
+    state: present
+    regexp: '^#?MACs'
+  notify: restart sshd
+  tags: [centos, ssh]
+
+- name: Make sure that sshd service is started and enabled on boot
+  service:
+    name: sshd
+    state: started
+    enabled: yes
+  tags: [centos, ssh, healthcheck]

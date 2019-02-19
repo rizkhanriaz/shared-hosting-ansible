@@ -1,0 +1,76 @@
+---
+
+- name: Install required tools for compiling OpenSSL
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - libtool
+    - perl-core 
+    - zlib-devel
+  tags: [openssl, install]
+
+# https://github.com/openssl/openssl/releases
+#
+- name: Download required source files
+  get_url:
+    dest: "{{ openssl_sources_location }}"
+    url: "https://github.com/openssl/openssl/archive/OpenSSL_{{ openssl_version | replace( '.', '_' ) }}.tar.gz"
+  tags: [openssl, install]
+
+- name: Unpack downloaded OpenSSL sources
+  unarchive:
+    src: "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}.tar.gz"
+    dest: "{{ openssl_sources_location }}"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    copy: no
+    creates: "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}"
+  tags: [openssl, install]
+
+- name: Compile OpenSSL
+  command: "{{ item }}"
+  args:
+    chdir: "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}"
+  with_items:
+    - "./config --prefix={{ openssl_install_path }} --openssldir={{ openssl_install_path }} shared zlib"
+    - make
+    - make test
+  become: true
+  become_user: "{{ build_user }}"
+  tags: [openssl, install]
+
+- name: Install compiled OpenSSL
+  command: make install
+  args:
+    chdir: "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}"
+  tags: [openssl, install]
+
+- name: Cleanup downloaded sources
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}.tar.gz"
+    - "{{ openssl_sources_location }}/openssl-OpenSSL_{{ openssl_version | replace( '.', '_' ) }}"
+  when: "openssl_cleanup_after_install == true"
+  tags: [openssl, install]
+
+- name: Link libraries
+  template:
+    src: openssl.conf.j2
+    dest: "/etc/ld.so.conf.d/openssl-{{ openssl_version }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload ldconfig
+  tags: [openssl, install]
+
+- name: Add OpenSSL executables to PATH
+  template:
+    src: openssl.sh.j2
+    dest: /etc/profile.d/openss.sh
+    owner: root
+    group: root
+    mode: 0644
+  tags: [openssl, install]

@@ -1,0 +1,21 @@
+---
+
+- name: Create FPM pools
+  template:
+    src: fpm-pool.j2
+    dest: "{{ php_install_path }}/{{ item.value.php.php_codename }}/etc/php-fpm.d/{{ item.key }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_dict: "{{ apache_vhosts_sites }}"
+  notify: "restart {{ item.value.php.php_codename }}-fpm"
+  when: item.key not in apache_vhosts_remove_sites
+
+- name: Remove FPM pools
+  file:
+    path: "{{ php_install_path }}/{{ item[0] }}/etc/php-fpm.d/{{ item[1] }}.conf"
+    state: absent
+  with_nested:
+    - "{{ installed_php_versions }}"
+    - "{{ apache_vhosts_remove_sites }}"
+  notify: "restart {{ item[0] }}-fpm"

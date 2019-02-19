@@ -1,0 +1,54 @@
+---
+
+- name: Dwonload bison version 2.7 to source
+  get_url:
+    dest: "{{ php_sources_location }}"
+    url: "https://ftp.gnu.org/gnu/bison/bison-{{ php_bison_version }}.tar.xz"
+  tags: [php, bison]
+
+- name: Unpack downloaded bison source
+  unarchive:
+    src: "{{ php_sources_location }}/bison-{{ php_bison_version }}.tar.xz"
+    dest: "{{ php_sources_location }}"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    copy: no
+    creates: "{{ php_sources_location }}/bison-{{ php_bison_version }}"
+  tags: [php, bison]
+
+- name: Set permissions to bison build config
+  file:
+    path: "{{ php_sources_location }}/bison-{{ php_bison_version }}/configure"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    mode: 0755
+  tags: [php, bison]
+
+- name: Compile bison
+  command: "{{ item }}"
+  args:
+    chdir: "{{ php_sources_location }}/bison-{{ php_bison_version }}"
+  with_items:
+    - "./configure {{ php_bison_configure_options | join(' ') }}"
+    - make
+  become: true
+  become_user: "{{ build_user }}"
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/bin/m4"
+  tags: [php, bison]
+
+- name: Install compiled bison
+  command: make install
+  args:
+    chdir: "{{ php_sources_location }}/bison-{{ php_bison_version }}"
+  tags: [php, bison]
+
+- name: Cleanup downloaded bison source
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ php_sources_location }}/bison-{{ php_bison_version }}.tar.xz"
+    - "{{ php_sources_location }}/bison-{{ php_bison_version }}"
+  when: "php_cleanup_after_install == true"
+  tags: [php, bison, cleanup]

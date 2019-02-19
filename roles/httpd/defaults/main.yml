@@ -1,0 +1,131 @@
+## INITIAL TASKS TO RUN ON THE CURRENT ROLE
+
+httpd_manage_installation: yes
+
+httpd_install_mod_cloudflare: yes
+
+httpd_manage_configuration: yes
+
+httpd_install_modsec: yes
+
+httpd_configure_owasp: yes
+
+httpd_configure_modsec: yes
+
+
+httpd_version: "2.4.37"
+
+httpd_apr_version: "1.6.5"
+
+httpd_apr_util_version: "1.6.1"
+
+httpd_sources_location: /usr/src
+
+build_user: centos
+
+build_group: centos
+
+httpd_install_path: /usr/local/apache2
+
+openssl_install_path: /usr/local/openssl
+
+httpd_configure_options:
+  - --enable-ssl
+  - --enable-http2
+  - --enable-so
+  - --with-mpm=event
+  - --with-included-apr
+  - "--prefix={{ httpd_install_path }}"
+  - --with-ssl={{ openssl_install_path }}
+
+httpd_cleanup_after_install: yes
+
+httpd_user: httpd
+
+httpd_group: www
+
+httpd_config_file: "{{ httpd_install_path }}/conf/httpd.conf"
+
+httpd_server_name: localhost
+
+httpd_port: 80
+
+httpd_active_modules:
+ - access_compat
+ - alias
+ - authz_core
+ - authz_host
+ - dir
+ - deflate
+ - expires
+ - filter
+ - http2
+ - log_config
+ - mime
+ - proxy
+ - proxy_fcgi
+ - remoteip
+ - rewrite
+ - setenvif
+ - socache_shmcb
+ - ssl
+ - status
+ - unixd
+ - unique_id
+
+httpd_directory_index: index.php index.html
+
+httpd_server_tokens: Prod
+
+httpd_server_signature: "off"
+
+httpd_file_etag: none
+
+httpd_mpm_config:
+  - { key: "StartServers", value: 5 }
+  - { key: "MinSpareThreads", value: 75 }
+  - { key: "MaxSpareThreads", value: 250 }
+  - { key: "ThreadsPerChild", value: 25 }
+  - { key: "MaxRequestWorkers", value: 400 }
+  - { key: "MaxConnectionsPerChild", value: 0 }
+
+httpd_enable_gzip_compression: yes
+
+httpd_gzip_mime_types:
+ - application/ecmascript
+ - application/javascript
+ - application/rss+xml
+ - application/xml
+ - application/x-javascript
+ - text/css
+ - text/html
+ - text/plain
+ - text/xml
+
+httpd_enable_expires_headers: yes
+
+httpd_expires_mime_types:
+  - image/gif
+  - image/ico
+  - image/jpg
+  - image/jpeg
+  - image/png
+  - text/css
+  - text/javascript
+
+httpd_expires_timeout: "1 week"
+
+httpd_real_ip_recording: yes
+
+httpd_modsec_version: "2.9.3"
+
+httpd_modsec_configure_options:
+  - "--with-apxs={{ httpd_install_path }}/bin/apxs" 
+  - "--with-apr={{ httpd_install_path }}/bin/apr-1-config"
+  - "--with-apu={{ httpd_install_path }}/bin/apu-1-config"
+
+httpd_modsec_install_path: /usr/local/modsecurity
+
+httpd_owasp_version: "v3.1.0"
+
+httpd_owasp_version_txt_only: "3.1.0"

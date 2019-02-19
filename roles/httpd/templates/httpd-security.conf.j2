@@ -1,0 +1,41 @@
+LoadModule security2_module modules/mod_security2.so
+
+<IfModule security2_module>
+    SecAuditLog {{ httpd_install_path }}/logs/modsec_audit.log
+    SecDebugLog {{ httpd_install_path }}/logs/modsec_debug.log
+    SecDebugLogLevel 0
+    SecDefaultAction "phase:2,deny,log,status:406"
+
+    ServerTokens Full
+    SecServerSignature "Protected"
+
+    SecAuditEngine "RelevantOnly"
+    SecRuleEngine "On"
+
+
+    ## ModSecurity configuration file includes:
+
+    Include "{{ httpd_install_path }}/conf/crs/crs-setup.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-901-INITIALIZATION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-905-COMMON-EXCEPTIONS.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-910-IP-REPUTATION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-912-DOS-PROTECTION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-913-SCANNER-DETECTION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-921-PROTOCOL-ATTACK.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-931-APPLICATION-ATTACK-RFI.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/REQUEST-949-BLOCKING-EVALUATION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-950-DATA-LEAKAGES.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-951-DATA-LEAKAGES-SQL.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-952-DATA-LEAKAGES-JAVA.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-953-DATA-LEAKAGES-PHP.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-954-DATA-LEAKAGES-IIS.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-959-BLOCKING-EVALUATION.conf"
+    Include "{{ httpd_install_path }}/conf/crs/rules/RESPONSE-980-CORRELATION.conf"
+
+</IfModule>

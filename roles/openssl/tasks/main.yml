@@ -1,0 +1,34 @@
+---
+
+- name: Check if OpenSSL is installed
+  command: openssl version warn=no
+  register: openssl_is_installed_test
+  ignore_errors: yes
+  changed_when: false
+  environment:
+    PATH: "{{ openssl_install_path }}/bin:{{ ansible_env.PATH }}"
+  tags: [openssl]
+
+- set_fact:
+    openssl_is_installed: true
+  when: openssl_is_installed_test.rc != 2
+  tags: [openssl]
+
+- set_fact:
+    openssl_is_installed: false
+    openssl_install_new_version: true
+  when: openssl_is_installed_test.rc == 2
+  tags: [openssl]
+
+- set_fact:
+    openssl_install_new_version: true
+  when: ( openssl_is_installed == true ) and ( openssl_is_installed_test.stdout.split(' ')[1] != openssl_version_in_dots )
+  tags: [openssl]
+
+- set_fact:
+    openssl_install_new_version: false
+  when: ( openssl_is_installed == true ) and ( openssl_is_installed_test.stdout.split(' ')[1] == openssl_version_in_dots )
+  tags: [openssl]
+
+- import_tasks: install.yml
+  when: "openssl_install_new_version == true and openssl_manage_installation == true"

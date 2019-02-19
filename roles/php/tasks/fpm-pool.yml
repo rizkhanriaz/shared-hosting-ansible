@@ -1,0 +1,30 @@
+
+- name: Create FPM pool directory if it doesn't exist
+  file:
+    path: "{{ php_install_path }}/etc/php-fpm.d"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: [php, fpm-pool]
+  
+
+- name: Create FPM pools
+  template:
+    src: fpm-pool.j2
+    dest: "{{ php_install_path }}/etc/php-fpm.d/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ php_fpm_pools }}"
+  notify: restart php-fpm
+  tags: [php, fpm-pool]
+
+
+- name: Include FPM pools in php conf
+  lineinfile:
+    dest: "{{ php_fpm_conf_file_path }}"
+    state: present
+    line: 'include=etc/php-fpm.d/*.conf'
+  notify: restart php-fpm
+  tags: [php, fpm-pool]

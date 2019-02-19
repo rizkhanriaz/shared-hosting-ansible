@@ -1,0 +1,26 @@
+---
+
+- name: restart httpd
+  service:
+    name: httpd
+    state: restarted
+
+- name: restart php56-fpm
+  service:
+    name: php56-fpm
+    state: restarted
+
+- name: restart php70-fpm
+  service:
+    name: php70-fpm
+    state: restarted
+
+- name: restart php71-fpm
+  service:
+    name: php71-fpm
+    state: restarted
+
+- name: restart php72-fpm
+  service:
+    name: php72-fpm
+    state: restarted

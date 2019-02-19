@@ -1,0 +1,18 @@
+
+- import_tasks: yum.yml
+  when: "centos_manage_yum == true"
+
+- import_tasks: groups.yml
+  when: "centos_manage_groups == true"
+
+- import_tasks: users.yml
+  when: "centos_manage_users == true"
+
+- import_tasks: sudo.yml
+  when: "centos_manage_sudo == true"
+
+- import_tasks: ssh.yml
+  when: "centos_manage_ssh == true"
+
+- import_tasks: thp.yml
+  when: "centos_disable_thp == true"

@@ -1,0 +1,116 @@
+---
+
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: latest
+  tags: [httpd, install]
+
+- name: Install required tools for compiling Apache httpd
+  yum:
+    name: ['autoconf', 'expat-devel', 'libtool', 'libnghttp2-devel', 'pcre-devel']
+    state: latest
+  tags: [httpd, install]
+
+# 1. Apache httpd - https://github.com/apache/httpd/releases
+# 2. Apache APR (portable runtime library) - https://github.com/apache/apr/releases
+# 3. Apache APR-util (utilities for APR) - https://github.com/apache/apr-util/releases
+#
+- name: Download required source files
+  get_url:
+    dest: "{{ httpd_sources_location }}"
+    url: "{{ item }}"
+  with_items:
+    - "https://github.com/apache/httpd/archive/{{ httpd_version }}.tar.gz"
+    - "https://github.com/apache/apr/archive/{{ httpd_apr_version }}.tar.gz"
+    - "https://github.com/apache/apr-util/archive/{{ httpd_apr_util_version }}.tar.gz"
+  tags: [httpd, install]
+
+- name: Unpack downloaded Apache httpd sources
+  unarchive:
+    src: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}.tar.gz"
+    dest: "{{ httpd_sources_location }}"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    copy: no
+    creates: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}"
+  tags: [httpd, install]
+
+- name: Unpack downloaded APR packages
+  unarchive:
+    src: "{{ httpd_sources_location }}/{{ item }}.tar.gz"
+    dest: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/srclib"
+    owner: "{{ build_user }}"
+    group: "{{ build_group }}"
+    copy: no
+    creates: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/{{ item }}"
+  with_items:
+    - "apr-{{ httpd_apr_version }}"
+    - "apr-util-{{ httpd_apr_util_version }}"
+  tags: [httpd, install]
+
+- name: Rename APR directory
+  command: "cp -R apr-{{ httpd_apr_version }} apr"
+  args:
+    chdir: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/srclib"
+    creates: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/srclib/apr"
+  become: true
+  become_user: "{{ build_user }}"
+  tags: [httpd, install]
+
+- name: Rename APR-Util directory
+  command: "cp -R apr-util-{{ httpd_apr_util_version }} apr-util"
+  args:
+    chdir: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/srclib"
+    creates: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}/srclib/apr-util"
+  become: true
+  become_user: "{{ build_user }}"
+  tags: [httpd, install]
+
+- name: Compile Apache httpd
+  command: "{{ item }}"
+  args:
+    chdir: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}"
+  with_items:
+    - ./buildconf
+    - "./configure {{ httpd_configure_options | join(' ') }}"
+    - make
+  become: true
+  become_user: "{{ build_user }}"
+  tags: [httpd, install]
+
+- name: Install compiled Apache httpd
+  command: make install
+  args:
+    chdir: "{{ httpd_sources_location }}/httpd-{{ httpd_version }}"
+  tags: [httpd, install]
+
+- name: Cleanup downloaded sources
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ httpd_sources_location }}/httpd-{{ httpd_version }}.tar.gz"
+    - "{{ httpd_sources_location }}/httpd-{{ httpd_version }}"
+    - "{{ httpd_sources_location }}/apr-{{ httpd_apr_version }}.tar.gz"
+    - "{{ httpd_sources_location }}/apr-util-{{ httpd_apr_util_version }}.tar.gz"
+  when: "httpd_cleanup_after_install == true"
+  tags: [httpd, install]
+
+- name: Add Apache httpd executables to PATH
+  template:
+    src: httpd.sh.j2
+    dest: /etc/profile.d/httpd.sh
+    owner: root
+    group: root
+    mode: 0644
+  tags: [httpd, install]
+
+- name: Add systemd entry for Apache httpd
+  template:
+    src: httpd.service.j2
+    dest: /etc/systemd/system/httpd.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: [httpd, install]

@@ -1,0 +1,21 @@
+---
+
+- name: Dump available groups
+  shell: "getent group > {{ centos_groups_initial_groups_list_path }}"
+  args:
+    creates: "{{ centos_groups_initial_groups_list_path }}"
+  tags: [centos, groups]
+
+- name: Remove groups from system
+  group:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ centos_groups_to_remove }}"
+  tags: [centos, groups]
+
+- name: Create groups
+  group:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ centos_groups_available }}"
+  tags: [centos, groups]

@@ -1,0 +1,72 @@
+
+- hosts: web-servers
+  become: yes
+  become_user: root
+  roles:
+    - ../roles/vhost
+  vars:
+    apache_vhosts_sites:
+
+      exampleone.com:
+        username: rtnouuqey4kjbsy
+        password: "Lb3QsI@L6ZS@AgkmpkDAF"
+        generate_ssh_key: yes
+        add_authorized_key: yes
+        path_to_file: 
+          - ../auth_key/jeff.pub
+          - ../auth_key/anne.pub
+        servername: "exampleone.com"
+        serveralias: "www.exampleone.com travel.exampleone.com"
+        php:
+          php_codename: php56
+          pool_name: exampleone_com
+          pool_port: 9008
+          process_manager:
+            pm: ondemand
+            max_children: 5
+            start_servers: 2
+            min_spare_servers: 1
+            max_spare_servers: 3
+          slow_log_timeout: 30s
+          php_admin_flags: [
+            { key: log_errors, value: "On" }
+          ]
+          php_admin_values: [
+            { key: disable_functions, value: "exec,passthru,shell_exec,system" }    
+          ]
+
+
+      exampletwo.com:
+        username: n4u1uhl979ap7jh4
+        password: "rG3$#1gZft3xPWur%C5Qp"
+        generate_ssh_key: yes
+        add_authorized_key: yes
+        path_to_file: 
+          - ../auth_key/robin.pub
+        servername: "exampletwo.com"
+        serveralias: "www.exampletwo.com"
+        php:
+          php_codename: php71 #php56 php70 php71 php72
+          pool_name: exampletwo_com
+          pool_port: 9009
+          process_manager:
+            pm: ondemand
+            max_children: 5
+            start_servers: 2
+            min_spare_servers: 1
+            max_spare_servers: 3
+          slow_log_timeout: 30s
+          php_admin_flags: [
+            { key: log_errors, value: "On" }
+          ]
+          php_admin_values: [
+            { key: disable_functions, value: "exec,passthru,shell_exec,system" }
+          ]
+
+    # apache_vhosts_remove_sites:
+    #   - exampleone.com
+    #   - exampletwo.com
+
+    # centos_users_to_remove:
+    #   - n4u1uhl979ap7jh4
+    #   - rtnouuqey4kjbsy

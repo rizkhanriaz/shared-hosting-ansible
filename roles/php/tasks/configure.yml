@@ -1,0 +1,162 @@
+---
+
+- name: Configure PHP short tags
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "short_open_tag = {{ php_short_open_tag }}"
+    state: present
+    regexp: '^;?short_open_tag'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure PHP version exposing
+  lineinfile:
+    path: "{{ php_ini_file_path }}"
+    line: "expose_php = {{ php_expose_php }}"
+    state: present
+    regexp: '^;?expose_php'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure maximum execution time
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "max_execution_time = {{ php_max_execution_time }}"
+    state: present
+    regexp: '^;?max_execution_time'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure maximum time for parsing data
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "max_input_time = {{ php_max_input_time }}"
+    state: present
+    regexp: '^;?max_input_time'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure memory limit
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "memory_limit = {{ php_memory_limit }}"
+    state: present
+    regexp: '^;?memory_limit'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure error reporting level
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "error_reporting = {{ php_error_reporting }}"
+    state: present
+    regexp: '^;?error_reporting'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure displaying errors
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "display_errors = {{ php_display_errors }}"
+    state: present
+    regexp: '^;?display_errors'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure displaying startup errors
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "display_startup_errors = {{ php_display_startup_errors }}"
+    state: present
+    regexp: '^;?display_startup_errors'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure logging errors
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "log_errors = {{ php_log_errors }}"
+    state: present
+    regexp: '^;?log_errors'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure maximum size of POST data
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "post_max_size = {{ php_post_max_size }}"
+    state: present
+    regexp: '^;?post_max_size'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure maximum size of uploaded file
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "upload_max_filesize = {{ php_upload_max_filesize }}"
+    state: present
+    regexp: '^;?upload_max_filesize'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure opening external files
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "allow_url_fopen = {{ php_allow_url_fopen }}"
+    state: present
+    regexp: '^;?allow_url_fopen'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure php mail
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "sendmail_path = {{ php_sendmail_path }}"
+    state: present
+    regexp: '^;?sendmail_path'
+    insertafter: "[mail function]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure date time
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "date.timezone = {{ php_date_timezone }}"
+    state: present
+    regexp: '^;?date\.timezone'
+    insertafter: "[Date]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure realpath cache size
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "realpath_cache_size = {{ php_realpath_cache_size }}"
+    state: present
+    regexp: '^;?realpath_cache_size'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+
+- name: Configure realpath cache TTL
+  lineinfile:
+    dest: "{{ php_ini_file_path }}"
+    line: "realpath_cache_ttl = {{ php_realpath_cache_ttl }}"
+    state: present
+    regexp: '^;?realpath_cache_ttl'
+    insertafter: "[PHP]"
+  notify: restart php-fpm
+  tags: [php, configure]
+

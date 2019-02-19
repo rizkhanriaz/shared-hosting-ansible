@@ -1,0 +1,60 @@
+---
+
+- name: Make sure that libselinux-python is installed
+  yum:
+    name: libselinux-python
+    state: latest
+  tags: [httpd]
+
+- name: Check if Apache httpd is installed
+  command: httpd -v warn=no
+  register: httpd_is_installed_test
+  ignore_errors: yes
+  changed_when: false
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ httpd_install_path }}/bin"
+  tags: [httpd]
+
+- set_fact:
+    httpd_is_installed: true
+  when: httpd_is_installed_test.rc != 2
+  tags: [httpd]
+
+- set_fact:
+    httpd_is_installed: false
+    httpd_install_new_version: true
+  when: httpd_is_installed_test.rc == 2
+  tags: [httpd]
+
+- set_fact:
+    httpd_install_new_version: true
+  when: ( httpd_is_installed == true ) and ( httpd_is_installed_test.stdout_lines[0] | regex_replace('[^0-9.]','') != httpd_version )
+  tags: [httpd]
+
+- set_fact:
+    httpd_install_new_version: false
+  when: ( httpd_is_installed == true ) and ( httpd_is_installed_test.stdout_lines[0] | regex_replace('[^0-9.]','') == httpd_version )
+  tags: [httpd]
+
+
+- import_tasks: install.yml
+  when: "httpd_install_new_version == true and httpd_manage_installation == true"
+
+- import_tasks: configure.yml
+  when: "httpd_manage_configuration == true"
+
+- import_tasks: modsecurity.yml
+  when: "httpd_install_modsec == true"
+
+- import_tasks: owaspruleset.yml
+  when: "httpd_configure_owasp == true"
+
+- import_tasks: modsecurityconfigupdate.yml
+  when: "httpd_configure_modsec == true"
+
+- name: Start and enable httpd service
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+  tags: [httpd, healthcheck]

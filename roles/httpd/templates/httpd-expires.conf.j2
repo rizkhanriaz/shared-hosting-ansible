@@ -1,0 +1,9 @@
+<IfModule mod_expires.c>
+  # Enable expirations
+  ExpiresActive On
+
+  # Expirations for given mime type
+{% for mime in httpd_expires_mime_types %}
+  ExpiresByType {{ mime }} "access plus {{ httpd_expires_timeout }}"
+{% endfor %}
+</IfModule>

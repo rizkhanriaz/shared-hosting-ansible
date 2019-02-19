@@ -1,0 +1,24 @@
+
+git_version: "2.19.1"
+
+git_sources_location: /usr/src
+
+git_required_packages:
+  - autoconf
+  - libcurl-devel
+  - expat-devel
+  - gcc
+  - gettext-devel 
+  - kernel-headers
+  - perl-devel 
+  - zlib-devel
+
+build_user: centos
+
+build_group: centos
+
+git_install_path: /usr/local/git
+
+git_cleanup_after_install: yes
+
+openssl_install_path: /usr/local/openssl

@@ -1,0 +1,16 @@
+
+openssl_manage_installation: yes
+
+openssl_version: "1_1_1a"
+
+openssl_version_in_dots: "1.1.1a"
+
+openssl_sources_location: /usr/src
+
+build_user: centos
+
+build_group: centos
+
+openssl_install_path: /usr/local/openssl
+
+openssl_cleanup_after_install: no

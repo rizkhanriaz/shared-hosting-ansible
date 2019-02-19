@@ -1,0 +1,37 @@
+---
+
+- name: Create user accounts
+  user:
+    name: "{{ item.value.username }}"
+    password: "{{ item.value.password }}"
+    state: present
+    generate_ssh_key: "{{ item.value.generate_ssh_key }}"
+    ssh_key_bits: 4096
+  with_dict: "{{ apache_vhosts_sites }}"
+  when: item.value.username not in centos_users_to_remove
+
+- name: Set user folder permissions
+  file:
+    path: "/home/{{ item.value.username }}"
+    owner: "{{ item.value.username }}"
+    group: "{{ item.value.username }}"
+    mode: 0711
+    state: directory
+  with_dict: "{{ apache_vhosts_sites }}"
+  when: item.value.username not in centos_users_to_remove
+
+- name: Add authorized keys to users
+  authorized_key:
+    user: "{{ item.0.username }}"
+    key: "{{ lookup('file', item.1) }}"
+  with_subelements:
+     - "{{ apache_vhosts_sites }}"
+     -  path_to_file
+  when: item.0.username not in centos_users_to_remove
+
+- name: Remove users
+  user:
+    name: "{{ item }}"
+    state: absent
+    remove: yes
+  with_items: "{{ centos_users_to_remove }}"

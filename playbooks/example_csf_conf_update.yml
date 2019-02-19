@@ -1,0 +1,15 @@
+
+- hosts: web-servers
+  become: yes
+  become_user: root
+  tasks:
+  - name: Update and restart CSF configuration
+    include_role:
+      name: ../roles/csf
+    vars:
+      csf_manage_installation: no
+      csf_manage_configuration: yes
+      csf_disable_firewall: no
+
+  vars_files:
+    - ../vars/csf-vars.yml

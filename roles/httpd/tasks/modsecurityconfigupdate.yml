@@ -1,0 +1,20 @@
+---
+
+- name: add modsecurity configuration template 
+  template:
+    src: httpd-security.conf.j2
+    dest: "{{ httpd_install_path }}/conf/extra/httpd-security.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart httpd
+  tags: [httpd, install, modsec]
+
+- name: Add and include modsec configuration in apache conf
+  lineinfile:
+    dest: "{{ httpd_config_file }}"
+    line: "Include conf/extra/httpd-security.conf"
+    state: present
+    regexp: '^#?Include\ conf\/extra/\httpd-security'
+  notify: restart httpd
+  tags: [httpd, install, modsec]

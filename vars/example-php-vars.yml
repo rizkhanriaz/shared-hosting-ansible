@@ -1,0 +1,170 @@
+## INITIAL TASKS TO RUN ON THE CURRENT ROLE
+
+php_manage_installation: yes
+
+php_manage_configuration: yes
+
+php_manage_fpm: yes
+
+php_setup_fpm_pool: yes
+
+php_manage_composer: no
+
+php_manage_opcache: yes
+
+php_set_executable_path: no
+
+php_bison_installtion: no
+
+php_force_restart: no
+
+
+## BISON INSTALLATION (Required to compile php 5.6)
+
+php_bison_version: "2.7"
+
+php_bison_install_path: "/usr/local/bison"
+
+php_libiconv_install_path: "/usr/local/libiconv"
+
+php_bison_configure_options:
+  - "--prefix={{ php_bison_install_path }}"
+  - "--with-libiconv-prefix={{ php_libiconv_install_path }}"
+
+
+## INSTALL TASKS CONFIGURATION
+
+php_version: "7.1.25"
+
+php_codename: php71
+
+php_install_path: "/usr/local/{{php_codename}}"
+
+php_force_install: no # skip all conditions
+
+php_sources_location: /usr/src
+
+build_user: centos
+
+build_group: centos
+
+php_configure_options:
+ - "--prefix={{ php_install_path }}"
+ - --enable-fpm
+ - --disable-short-tags
+ - --with-openssl
+ - --with-pcre-regex
+ - --with-pcre-jit
+ - --with-zlib
+ - --enable-bcmath
+ - --with-bz2
+ - --enable-calendar
+ - --with-curl
+ - --enable-exif
+ - --with-gd
+ - --enable-intl
+ - --enable-mbstring
+ - --with-mysqli
+ - --enable-pcntl
+ - --with-pdo-mysql
+ - --enable-soap
+ - --enable-sockets
+ - --with-xmlrpc
+ - --enable-zip
+ - --with-webp-dir
+ - --with-jpeg-dir
+ - --with-png-dir
+ - --without-pear #this line is added due to pear.php.net certificate issue. Once the issue is resolved, get rid of this line#
+
+php_cleanup_after_install: yes
+
+php_composer_install_path: /usr/local/bin
+
+
+## CONFIGURE TASKS CONFIGURATION
+
+php_ini_file_path: "{{ php_install_path }}/lib/php.ini"
+
+php_short_open_tag: "Off"
+
+php_expose_php: "Off"
+
+php_max_execution_time: 30
+
+php_max_input_time: 60
+
+php_memory_limit: 128M
+
+php_error_reporting: E_ALL
+
+php_display_errors: "Off"
+
+php_display_startup_errors: "Off"
+
+php_log_errors: "On"
+
+php_post_max_size: 8M
+
+php_upload_max_filesize: 2M
+
+php_allow_url_fopen: "On"
+
+php_date_timezone: UTC
+
+php_realpath_cache_size: 4096k
+
+php_realpath_cache_ttl: 600
+
+php_sendmail_path: /usr/sbin/sendmail -t -i
+
+
+## FPM CONFIGURATION
+
+php_fpm_conf_file_path: "{{ php_install_path }}/etc/php-fpm.conf"
+
+php_pid_location: run/php-fpm.pid
+
+
+## FPM DEFAULT POOL CONFIGURATION
+
+php_fpm_pool_name: example_com
+php_fpm_pool_port: 9000
+
+php_fpm_pools:
+ - {
+  name: "{{php_fpm_pool_name}}",
+  user: httpd, # httpd user
+  group: www, # httpd group
+  port: "{{php_fpm_pool_port}}",
+  process_manager: {
+    pm: ondemand,
+    max_children: 5,
+    start_servers: 2,
+    min_spare_servers: 1,
+    max_spare_servers: 3
+  },
+  slow_log: "var/log/$pool.log.slow",
+  slow_log_timeout: 30s,
+  php_admin_flags: [
+    { key: log_errors, value: "On" }
+  ],
+  php_admin_values: [
+      { key: error_log, value: /var/log/fpm-php.www.log },
+      { key: open_basedir, value: /var },
+      { key: disable_functions, value: "exec,passthru,shell_exec,system" }
+    ]
+ }
+
+
+## OPCACHE TASKS CONFIGURATION
+
+php_opcache_enable: "1"
+
+php_opcache_memory_consumption: "128" # in MB
+
+php_opcache_interned_strings_buffer: "8" # in MB
+
+php_opcache_accelerated_files: "20000"
+
+# for dev environment recommended value is 1
+php_opcache_validated_timestamps: "1"

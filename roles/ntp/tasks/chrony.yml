@@ -1,0 +1,44 @@
+---
+
+- name: Remove ntp packages if present
+  yum:
+    name: "{{ item }}"
+    state: removed
+  with_items:
+    - ntp
+    - ntpdate
+  when: ntp_chrony_remove_ntpd == true
+  tags: [ntp, chrony]
+
+- name: Install chrony
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - chrony
+    - libselinux-python
+  tags: [ntp, chrony]
+
+- name: Add servers to sync with
+  lineinfile:
+    dest: /etc/chrony.conf
+    line: "server {{ item }} iburst"
+    state: present
+  with_items: "{{ ntp_chrony_servers }}"
+  notify: restart chronyd
+  tags: [ntp, chrony]
+
+- name: Remove all other servers
+  lineinfile:
+    dest: /etc/chrony.conf
+    regexp: "server (?!{{ ntp_chrony_servers | join('|') |  replace('.','\\.') }})"
+    state: absent
+  notify: restart chronyd
+  tags: [ntp, chrony]
+
+- name: Start and enable chronyd service
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  tags: [ntp, chrony, healthcheck]
