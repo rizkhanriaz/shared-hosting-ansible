@@ -1,5 +1,11 @@
 ---
 
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: latest
+  tags: [centos, yum]
+
 - name: Dump installed packages
   shell: "yum list installed > {{ centos_yum_initial_package_list_path }} warn=no"
   args:
