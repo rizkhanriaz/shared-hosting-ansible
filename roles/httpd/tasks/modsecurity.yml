@@ -71,3 +71,35 @@
     group: root
     mode: 0755
   tags: [httpd, install, modsec]
+
+# creat modsecurity directories
+#
+- name: Create modsecurity opt directory
+  file:
+    path: "{{ httpd_modsec_opt_dir_path }}"
+    owner: root
+    group: "{{ httpd_group }}"
+    mode: 0750
+    state: directory
+  tags: [httpd, install, modsec]
+
+- name: Create modsecurity var directory
+  file:
+    path: "{{ httpd_modsec_opt_dir_path }}/var"
+    owner: root
+    group: "{{ httpd_group }}"
+    mode: 0750
+    state: directory
+  tags: [httpd, install, modsec]
+
+- name: Create modsecurity data and tmp directory
+  file:
+    path: "{{ httpd_modsec_opt_dir_path }}/var/{{ item }}"
+    owner: "{{ httpd_user }}"
+    group: root
+    mode: 0700
+    state: directory
+  with_items:
+    - data
+    - tmp
+  tags: [httpd, install, modsec]

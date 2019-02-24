@@ -9,6 +9,7 @@ LoadModule security2_module modules/mod_security2.so
     ServerTokens Full
     SecServerSignature "Protected"
 
+    SecDataDir {{ httpd_modsec_opt_dir_path }}/var/data/
     SecAuditEngine "RelevantOnly"
     SecRuleEngine "On"
 

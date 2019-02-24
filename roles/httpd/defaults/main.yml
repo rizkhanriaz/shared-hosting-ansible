@@ -126,6 +126,8 @@ httpd_modsec_configure_options:
 
 httpd_modsec_install_path: /usr/local/modsecurity
 
+httpd_modsec_opt_dir_path: /opt/modsecurity
+
 httpd_owasp_version: "v3.1.0"
 
 httpd_owasp_version_txt_only: "3.1.0"
