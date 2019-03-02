@@ -8,6 +8,8 @@ csf_disable_firewall: yes
 
 csf_tmp_dir: "/usr/src"
 
+httpd_install_path: /usr/local/apache2
+
 csf_required_packages:
   - iptables
   - perl
@@ -25,6 +27,10 @@ csf_global_ini_core:
     value: "1"
   - option: PORTS_sshd
     value: 22
+  - option: HTACCESS_LOG
+    value: "{{httpd_install_path}}/logs/error_log"
+  - option: MODSEC_LOG
+    value: "{{httpd_install_path}}/logs/error_log"
 
 csf_global_ini:
   - option: RESTRICT_UI
